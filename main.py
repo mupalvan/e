@@ -3,14 +3,10 @@ from woocommerce import API
 import os
 import csv
 from time import sleep
+import sqlite3
 
 # اتصال به SQL Server
-conn = pyodbc.connect(
-    'DRIVER={ODBC Driver 17 for SQL Server};'
-    'SERVER=DESKTOP-RFH2G51;'
-    'DATABASE=KarbinoEMP_Ehsan_1404;'
-    'Trusted_Connection=yes;'
-)
+conn = sqlite3.connect("ehsanDBproduct.db")
 cursor = conn.cursor()
 
 
@@ -82,42 +78,21 @@ if not pa_color_id:
     print("ویژگی pa_color پیدا نشد!")
     exit()
 
-# 📊 موجودی کالا
-cursor.execute("""
-    SELECT CodeKala, 
-           SUM(ISNULL(TededVorodi, 0)) - SUM(ISNULL(TedadOut, 0)) AS Mojoodi
-    FROM GardeshKala1
-    GROUP BY CodeKala
-""")
-stock_by_sku = {str(row.CodeKala): int(row.Mojoodi or 0) for row in cursor.fetchall()}
-
 # 📥 دریافت محصولات
 cursor.execute("""
-    SELECT Code_Kala, Mosahakhasat_Fani1, SitePrice, Mosahakhasat_Fani2, Mosahakhasat_Fani3
-    FROM Kalas
-    WHERE SitePrice != 0
-    ORDER BY Code_Kala
+    SELECT *
+    FROM products
+    WHERE name = 'کفشور استیل مدل 7000'
+    ORDER BY id
 """)
+
+# استخراج نام ستون‌ها
+columns = [column[0] for column in cursor.description]
+
+# تبدیل هر ردیف به دیکشنری با کلیدهای مشخص
 products = []
 for row in cursor.fetchall():
-    code_kala = str(row.Code_Kala)
-    mosahakhasat = row.Mosahakhasat_Fani1
-    site_price = row.SitePrice
-    category = row.Mosahakhasat_Fani2
-    name = row.Mosahakhasat_Fani3
-
-    parts = mosahakhasat.split('_')
-    brand, model, color = parts if len(parts) == 3 else ('نامشخص', 'نامشخص', 'نامشخص')
-
-    products.append({
-        'sku': code_kala,
-        'brand': brand,
-        'model': model,
-        'color': color,
-        'price': int(str(site_price)[:-1]),
-        'category': category,
-        'name': name,
-    })
+    products.append(dict(zip(columns, row)))
 
 cursor.close()
 conn.close()
@@ -139,9 +114,9 @@ base_image_url = "https://ehsanstore.ir/wp-content/uploads/images/"
 
 # 🧩 ایجاد محصولات متغیر و وارییشن‌ها
 for name, group_products in groups.items():
-    print(name)
     parent = group_products[0]
-    parent_image_url = f"{base_image_url}{parent['sku']}.webp"
+    
+    parent_image_url = f"{base_image_url}{parent['id']}.webp"
     category_id = resolve_category_id(parent['category'])
 
     if not category_id:
@@ -150,9 +125,9 @@ for name, group_products in groups.items():
 
     parent_data = {
         "name": name,
-        "type": "variable",
+        "type": parent['productType'],
         "regular_price": str(parent['price']),
-        "description": f"محصول متغیر {parent['brand']} مدل {parent['model']}",
+        "description": str(parent['description']),
         "categories": [{"id": category_id}],
         "attributes": [{
             "id": pa_color_id,
@@ -165,7 +140,7 @@ for name, group_products in groups.items():
         }],
         "images": [{"src": parent_image_url}]
     }
-
+    
     # بررسی وجود محصول والد
     existing = wcapi.get("products", params={"search": name}).json()
     if isinstance(existing, list) and any(p['name'] == name for p in existing):
@@ -182,9 +157,9 @@ for name, group_products in groups.items():
 
     # وارییشن‌ها
     for var in group_products:
-        sku = var['sku']
-        stock = stock_by_sku.get(sku, 0)
-        print(stock)
+        sku = str(var['id'])
+        stock = var['stock_quantity']
+        
         var_image_url = f"{base_image_url}{sku}.webp"
 
         var_data = {
@@ -198,7 +173,7 @@ for name, group_products in groups.items():
             "stock_quantity": stock,
             "stock_status": "instock" if stock > 0 else "outofstock"
         }
-
+        
         variations = wcapi.get(f"products/{parent_id}/variations").json()
         existing_var = next((v for v in variations if v.get('sku') == sku), None)
 
