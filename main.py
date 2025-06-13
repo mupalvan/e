@@ -122,7 +122,7 @@ for name, group_products in groups.items():
     if not category_id:
         csv_writer.writerow(['ایجاد والد', '', name, 'خطا', 'دسته‌بندی یافت نشد'])
         continue
-
+    
     parent_data = {
         "name": name,
         "type": parent['productType'],
@@ -138,7 +138,13 @@ for name, group_products in groups.items():
             "options": list(set(colors_dict.get(p['color'], p['color']) for p in group_products))
 
         }],
-        "images": [{"src": parent_image_url}]
+        "images": [{"src": parent_image_url}],
+        "meta_data": [
+            {
+                "key": "rank_math_focus_keyword",
+                "value": str(parent['keyword']).replace('-',',')
+            }
+        ]
     }
     
     # بررسی وجود محصول والد
