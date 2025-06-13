@@ -221,7 +221,7 @@ for name, group_products in groups.items():
         var_image_url = f"{base_image_url}{sku}.webp"
 
         var_data = {
-            "regular_price": str(var['price']),
+            "regular_price": str(int(var['price']) // 10),
             "sku": sku,
             "meta_data": [{"key": "gtin", "value": sku}],
             "attributes": [{"id": pa_color_id, "name": "رنگ", "option": colors_dict.get(var['color'], var['color'])}],
