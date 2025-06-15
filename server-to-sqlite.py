@@ -2,13 +2,13 @@ import sqlite3
 import pyodbc
 
 # اتصال به SQLite
-sqlite_conn = sqlite3.connect('ehsanDBproduct.db')
+sqlite_conn = sqlite3.connect("C:\\Users\\Administrator\\Documents\\e\\ehsanDBproduct.db")
 sqlite_cursor = sqlite_conn.cursor()
 
 # اتصال به SQL Server
 sqlserver_conn = pyodbc.connect(
     'DRIVER={ODBC Driver 17 for SQL Server};'
-    'SERVER=DESKTOP-RFH2G51;'
+    'SERVER=KARBINO-SERVER;'
     'DATABASE=KarbinoEMP_Ehsan_1404;'
     'Trusted_Connection=yes;'
 )

@@ -6,7 +6,7 @@ from time import sleep
 import sqlite3
 
 # اتصال به SQLite
-conn = sqlite3.connect("ehsanDBproduct.db")
+conn = sqlite3.connect("C:\\Users\\Administrator\\Documents\\e\\ehsanDBproduct.db")
 cursor = conn.cursor()
 
 # اتصال به ووکامرس
@@ -80,7 +80,6 @@ if not pa_color_id:
 cursor.execute("""
     SELECT *
     FROM products
-    WHERE name = 'کفشور استیل مدل 7000'
     ORDER BY id
 """)
 
@@ -209,7 +208,9 @@ for name, group_products in groups.items():
             csv_writer.writerow(['ایجاد والد', '', name, 'خطا', str(resp.json())])
             continue
         parent_id = resp.json()['id']
-        sleep(3)  # مکث برای ثبت نهایی
+        sleep(5)  # مکث برای ثبت نهایی
+        wcapi.put(f"products/{parent_id}", {"type": "variable"})
+        sleep(5)
         updated_product = wcapi.get(f"products/{parent_id}").json()
         if updated_product.get('type') != 'variable':
             print(f"⚠️ هشدار: محصول {name} هنوز variable نشده!")
@@ -251,6 +252,7 @@ for name, group_products in groups.items():
                 csv_writer.writerow(['ایجاد وارییشن', sku, name, 'موفق', f"ID: {var_id}"])
 
     sleep(3)
+    print(name)
     price = 0
 print(f"✅ اسکریپت با موفقیت اجرا شد. فایل لاگ: {log_file}")
 

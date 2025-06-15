@@ -1,17 +1,7 @@
-import requests
-from requests.auth import HTTPBasicAuth
-
-# کلیدهای API ووکامرس
-ck = "ck_000fbb9f08fcd924776db7af5e040d179b044f75"
-cs = "cs_61ec024891b4b178006ffcf3199e3ab0178b817b"
-
-# جستجوی محصول با نام
-url = "https://ehsanstore.ir/wp-json/wc/v3/products"
-params = {
-    "search": "کفشور استیل مدل 7000"
-}
-
-response = requests.get(url, auth=HTTPBasicAuth(ck, cs), params=params)
-product_data = response.json()
-
-print(product_data)
+نمونه لینک محصولات فروشگاه:
+محصول موجود:
+https://ehsanstore.ir/product/%d8%af%d9%88%d8%b4-%d8%a7%d8%b3%d8%aa%db%8c%d9%84-%d9%be%db%8c%d8%a7%d9%86%d9%88%db%8c%db%8c/
+محصول ناموجود:
+https://ehsanstore.ir/product/%D8%AF%D9%88%D8%B4-%D8%A7%D8%B3%D8%AA%DB%8C%D9%84-%D9%BE%DB%8C%D8%A7%D9%86%D9%88%DB%8C%DB%8C1/
+محصول دارای تخفیف:
+https://ehsanstore.ir/product/%d8%b3%d8%b1%d9%88%db%8c%d8%b3-%d8%ad%d9%85%d8%a7%d9%85-%d8%a7%d8%b3%d8%aa%db%8c%d9%84-%da%a9%d9%86%d8%ac-%d8%b3%d9%87-%d8%b7%d8%a8%d9%82%d9%87-2903/
